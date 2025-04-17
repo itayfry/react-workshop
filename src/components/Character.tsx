@@ -1,7 +1,12 @@
 type CharacterProps = {
     name: string,
     baseHealth: number,
-    moveName: string,
+    currentHealth: number
+    move: {
+        name: string,
+        power: number,
+    }
+    attackCallback: (movePower: number) => void
 }
 
 
@@ -9,8 +14,8 @@ const Character = (props: CharacterProps) => {
     
     return (
         <div>
-            <h2>{props.name} | health: {props.baseHealth} / {props.baseHealth}</h2>
-            <div>Moves: <button>{props.moveName}</button></div>
+            <h2>{props.name} | health: {props.currentHealth} / {props.baseHealth}</h2>
+            <div>Moves: <button onClick={() => props.attackCallback(props.move.power)}>{props.move.name}</button></div>
         </div>
     )
 }
