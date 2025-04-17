@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import App from './App'
 
-test('renders counter', () => {
+test('renders Game component', () => {
   render(<App />)
-  expect(screen.getByText(/count is 0/i)).toBeInTheDocument()
+  expect(screen.getByTestId('game')).toBeInTheDocument()
 })
