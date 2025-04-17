@@ -1,4 +1,5 @@
 import Logo from "./Logo"
+import styles from "./Header.module.css"
 
 type HeaderProps = {
     winner?: string
@@ -7,7 +8,7 @@ type HeaderProps = {
 const Header = (props: HeaderProps) => {
     return (
         <div>
-            <div style={{ display: 'flex' }}>
+            <div className={styles.header}>
                 <Logo />
                 <h1>My Amazing Game</h1>
                 <Logo />
