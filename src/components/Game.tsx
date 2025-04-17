@@ -1,55 +1,134 @@
 import Header from './Header'
-import { Move } from '../types'
+import { Move, PokemonResult, PokemonData } from '../types'
 import Character from './Character'
+import PokemonSelector from './PokemonSelector'
+import BattleLog from './BattleLog'
 import { useEffect, useState } from 'react'
 
+const defaultPokemonData = {
+    name: 'Pokemon',
+    baseHp: 100,
+    currentHp: 100,
+    imgUrl: '',
+    moves: [],
+}
+
 const Game = () => {
-    useEffect(() => {
-        fetch('https://pokeapi.co/api/v2/pokemon/pikachu').then(respone => respone.json()).then(data => console.log(data))
-    }, [])
-    const [playerPokemonHealth, setPlayerPokemonHealth] = useState(100)
-    const [oponentPokemonHealth, setOponnentPokemonHealth] = useState(140)
     const [winner, setWinner] = useState<string | undefined>();
+    const [availablePokemon, setAvailablePokemon] = useState([])
+    const [playerSelection, setPlayerSelection] = useState<PokemonResult>()
+    const [opponentSelection, setOpponentSelection] = useState<PokemonResult>()
+    const [playerPokemon, setPlayerPokemon] = useState<PokemonData>({ ...defaultPokemonData })
+    const [opponentPokemon, setOpponentPokemon] = useState<PokemonData>({ ...defaultPokemonData })
+    const [battleLog, setBattleLog] = useState<Array<string>>([])
+
+    const didAttackLand = (move: Move) => (move.accuracy >= (Math.random() * 100))
+    const onPlayerAttackClicked = (move: Move) => {
+        let message;
+        if (didAttackLand(move)) {
+            setOpponentPokemon(prev => ({ ...prev, currentHp: Math.max(prev.currentHp - move.power, 0) }))
+            message = `${playerPokemon.name} landed a ${move.name} on ${opponentPokemon.name}`
+        }
+        else {
+            message = `${playerPokemon.name} missed with ${move.name}`
+        }
+        setBattleLog(prev => [...prev, message])
+    }
+    const onOpenentAttackClicked = (move: Move) => {
+        let message;
+        if (didAttackLand(move)) {
+            message = `${opponentPokemon.name} landed a ${move.name} on ${playerPokemon.name}`
+            setPlayerPokemon(prev => ({ ...prev, currentHp: Math.max(prev.currentHp - move.power, 0) }))
+        }
+        else {
+            message = `${opponentPokemon.name} missed with ${move.name}`
+        }
+        setBattleLog(prev => [...prev, message])
+    }
+
+    const transformPokemonResult = async (pokemonResult: PokemonResult) => {
+        const res: Partial<PokemonData> = {};
+        await (fetch(pokemonResult.url)
+            .then(response => response.json())
+            .then(async data => {
+                res.name = data.name
+                res.baseHp = data.stats[0].base_stat
+                res.currentHp = res.baseHp
+                res.imgUrl = data.sprites.front_default
+                res.moves = []
+                for (const moveResult of data.moves.slice(0, 4)) {
+                    await fetch(moveResult.move.url).then(res => res.json()).then(data => {
+                        const name: string = data.names.filter((n: { language: { name: string } }) => n.language.name === 'en')[0].name
+                        const { accuracy } = data
+                        const power = Math.ceil(data.power / 4)
+                        res.moves!.push({ name, power, accuracy })
+                    })
+                }
+            })
+        )
+        return res as PokemonData
+
+    }
 
     useEffect(() => {
-        if (playerPokemonHealth <= 0){
-            setWinner('Ekans')
+        fetch('https://pokeapi.co/api/v2/pokemon?offset=24')
+            .then(respone => respone.json())
+            .then(data => {
+                setAvailablePokemon(data.results.filter((_: PokemonResult, i: number) => !(i % 2)))
+            })
+    }, [])
+
+
+    useEffect(() => {
+        if (playerPokemon.currentHp <= 0) {
+            setWinner(opponentPokemon.name)
         }
-        else if (oponentPokemonHealth <=0){
-            setWinner('Pikachu')
+        else if (opponentPokemon.currentHp <= 0) {
+            setWinner(playerPokemon.name)
         }
-    }, [playerPokemonHealth, oponentPokemonHealth])
-    const didAttackLand = (move: Move) => (move.accuracy >= (Math.random() * 100))
-    const onPlayerAttackClicked = (move: Move) => didAttackLand(move) && setOponnentPokemonHealth(prev => Math.max(prev - move.power, 0))
-    const onOpenentAttackClicked = (move: Move) => didAttackLand(move) && setPlayerPokemonHealth(prev => Math.max(prev - move.power, 0))
+    }, [playerPokemon, opponentPokemon])
+
+    useEffect(() => {
+        if (playerSelection?.url) {
+            transformPokemonResult(playerSelection!).then(res => setPlayerPokemon(res));
+        }
+    }, [playerSelection])
+    useEffect(() => {
+        if (opponentSelection?.url) {
+            transformPokemonResult(opponentSelection!).then(res => setOpponentPokemon(res));
+        }
+    }, [opponentSelection])
+
+
 
     return (
         <div data-testid={'game'}>
-            <Header winner={winner}/>
-
-            <Character
-                name="Pikachu"
-                baseHealth={100}
-                currentHealth={playerPokemonHealth}
-                moves={[
-                    {name:'Thunderbolt', power: 12, accuracy: 85},
-                    {name:'Bolt', power: 8, accuracy: 95},
-                ]}
-                attackCallback={(move) => onPlayerAttackClicked(move)}
-                disabledButtons={!!winner}
-                />
-            <div style={{ height: '200px' }}></div>
-            <Character
-                name="Ekans"
-                baseHealth={140}
-                currentHealth={oponentPokemonHealth}
-                moves={[
-                    {name:'Bite', power: 8, accuracy: 90},
-                    {name:'Tackle', power: 7, accuracy: 95},
-                ]}
-                attackCallback={(move) => onOpenentAttackClicked(move)}
-                disabledButtons={!!winner}
+            <Header winner={winner} />
+            <PokemonSelector
+                availablePokemon={availablePokemon}
+                setPlayerPokemon={(pokemon: PokemonResult) => setPlayerSelection(pokemon)}
+                setOpponentPokemon={(pokemon: PokemonResult) => setOpponentSelection(pokemon)}
             />
+            {playerPokemon &&
+                <Character
+                    name={playerPokemon.name}
+                    baseHp={playerPokemon.baseHp}
+                    currentHp={playerPokemon.currentHp}
+                    moves={playerPokemon.moves}
+                    imgUrl={playerPokemon.imgUrl}
+                    attackCallback={(move) => onPlayerAttackClicked(move)}
+                    disabledButtons={!!winner}
+                />
+            }
+            <div style={{ height: '200px' }}></div>
+            {opponentPokemon &&
+                <Character
+                    {...opponentPokemon}
+                    attackCallback={(move) => onOpenentAttackClicked(move)}
+                    disabledButtons={!!winner}
+                />
+            }
+            <BattleLog messages={battleLog}/>
         </div>
 
     )
