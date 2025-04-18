@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { PokemonResult } from "../types"
+import styles from "./PokemonSelector.module.css"
 
 type PokemonSelectorProps = {
     availablePokemon: Array<{
@@ -8,6 +9,7 @@ type PokemonSelectorProps = {
     }>,
     setPlayerPokemon: (pokemon: PokemonResult) => void
     setOpponentPokemon: (pokemon: PokemonResult) => void
+    selectionCompleteCallback: () => void
 }
 
 const PokemonSelector = (props: PokemonSelectorProps) => {
@@ -20,12 +22,13 @@ const PokemonSelector = (props: PokemonSelectorProps) => {
         }
         else {
             props.setOpponentPokemon(option)
+            props.selectionCompleteCallback()
         }
     }
 
     return selections.length < 2 ? (
-        <div>
-            Pokemon selector
+        <div className={styles.container}>
+            <div className={styles.title}>Player {selections.length + 1}:</div>
             {props.availablePokemon.map(option =>
             (
                 <button

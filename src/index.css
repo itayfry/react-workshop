@@ -39,6 +39,10 @@ h1 {
   line-height: 1.1;
 }
 
+h1,h2,h3,h4 {
+  text-transform: capitalize;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -48,6 +52,7 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
+  text-transform: capitalize;
   transition: border-color 0.25s;
 }
 button:hover {
@@ -70,6 +75,19 @@ button:focus-visible {
     color: #747bff;
   }
   button {
-    background-color: #f9f9f9;
+    background-color: transparent;
+    background-image: linear-gradient(to bottom right, rgba(255,0,0,0.7), rgba(0,0,255,0.5));
+    color: #f9f9f9;
+  }
+  button:hover {
+    background-image: linear-gradient(to bottom right, rgba(255,0,0,0.8), rgba(0,0,255,0.7));
+  }
+  button:disabled {
+    background-color: rgba(127,127, 127, 0.5);
+    background-image: none;
+    cursor: default;
+  }
+  button:disabled:hover {
+    border-color: transparent;
   }
 }

@@ -4,6 +4,7 @@ import Character from './Character'
 import PokemonSelector from './PokemonSelector'
 import BattleLog from './BattleLog'
 import { useEffect, useState } from 'react'
+import { WinnerModal } from './WinnerModal'
 
 const defaultPokemonData = {
     name: 'Pokemon',
@@ -21,6 +22,9 @@ const Game = () => {
     const [playerPokemon, setPlayerPokemon] = useState<PokemonData>({ ...defaultPokemonData })
     const [opponentPokemon, setOpponentPokemon] = useState<PokemonData>({ ...defaultPokemonData })
     const [battleLog, setBattleLog] = useState<Array<string>>([])
+    const [activePlayer, setActivePlayer] = useState(0)
+
+    const toggleActivePlayer = () => activePlayer === 1 ? setActivePlayer(2) : setActivePlayer(1)
 
     const didAttackLand = (move: Move) => (move.accuracy >= (Math.random() * 100))
     const onPlayerAttackClicked = (move: Move) => {
@@ -33,6 +37,7 @@ const Game = () => {
             message = `${playerPokemon.name} missed with ${move.name}`
         }
         setBattleLog(prev => [...prev, message])
+        toggleActivePlayer()
     }
     const onOpenentAttackClicked = (move: Move) => {
         let message;
@@ -44,6 +49,7 @@ const Game = () => {
             message = `${opponentPokemon.name} missed with ${move.name}`
         }
         setBattleLog(prev => [...prev, message])
+        toggleActivePlayer()
     }
 
     const transformPokemonResult = async (pokemonResult: PokemonResult) => {
@@ -104,10 +110,12 @@ const Game = () => {
     return (
         <div data-testid={'game'}>
             <Header winner={winner} />
+            <WinnerModal winnerName={winner}/>
             <PokemonSelector
                 availablePokemon={availablePokemon}
                 setPlayerPokemon={(pokemon: PokemonResult) => setPlayerSelection(pokemon)}
                 setOpponentPokemon={(pokemon: PokemonResult) => setOpponentSelection(pokemon)}
+                selectionCompleteCallback={() => setActivePlayer(1)}
             />
             {playerPokemon &&
                 <Character
@@ -117,7 +125,7 @@ const Game = () => {
                     moves={playerPokemon.moves}
                     imgUrl={playerPokemon.imgUrl}
                     attackCallback={(move) => onPlayerAttackClicked(move)}
-                    disabledButtons={!!winner}
+                    disabledButtons={!!winner || activePlayer !== 1}
                 />
             }
             <div style={{ height: '100px' }}></div>
@@ -125,7 +133,7 @@ const Game = () => {
                 <Character
                     {...opponentPokemon}
                     attackCallback={(move) => onOpenentAttackClicked(move)}
-                    disabledButtons={!!winner}
+                    disabledButtons={!!winner  || activePlayer !== 2}
                 />
             }
             <BattleLog messages={battleLog}/>
