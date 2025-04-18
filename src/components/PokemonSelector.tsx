@@ -23,20 +23,20 @@ const PokemonSelector = (props: PokemonSelectorProps) => {
         }
     }
 
-    return (
+    return selections.length < 2 ? (
         <div>
-            Props selector
+            Pokemon selector
             {props.availablePokemon.map(option =>
             (
                 <button
                     key={option.name}
-                    disabled={selections.length >= 2 || selections.includes(option.name)}
+                    disabled={selections.includes(option.name)}
                     onClick={() => onSelectionClick(option)}>
                     {option.name}
                 </button>)
             )}
         </div>
-    )
+    ) : <h2>Fight!</h2>
 }
 
 export default PokemonSelector

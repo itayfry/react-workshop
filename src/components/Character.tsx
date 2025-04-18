@@ -1,4 +1,5 @@
 import { Move } from "../types"
+import styles from "./Character.module.css"
 
 type CharacterProps = {
     name: string,
@@ -13,9 +14,9 @@ type CharacterProps = {
 const Character = (props: CharacterProps) => {
 
     return (
-        <div>
-            {props.imgUrl && <img src={props.imgUrl}></img>}<h3>{props.name} | health: {props.currentHp} / {props.baseHp}</h3>
-            <div>Moves:
+        <div className={styles.character}>
+            <div className={styles.header}>{props.imgUrl && <img src={props.imgUrl}></img>}<h3 >{props.name} | health: {props.currentHp} / {props.baseHp}</h3></div>
+            <div className={styles.moves}>Moves:
                 {
                     props.moves.map(move => (<button key={move.name} disabled={props.disabledButtons} onClick={() => props.attackCallback(move)}> {move.name}</button>))
                 }

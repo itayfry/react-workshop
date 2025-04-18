@@ -1,0 +1,15 @@
+.character {
+
+}
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.moves {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px
+}
+

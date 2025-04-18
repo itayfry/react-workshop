@@ -1,0 +1,15 @@
+.battleLog{
+    width: 500px;
+    margin: auto
+}
+.messages{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid blue;
+    border-radius: 2%;
+}
+
+.message:nth-child(odd){
+    background-color: gray;
+    color: white;
+}
