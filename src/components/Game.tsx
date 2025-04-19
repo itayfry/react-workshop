@@ -5,6 +5,8 @@ import PokemonSelector from './PokemonSelector'
 import BattleLog from './BattleLog'
 import { useEffect, useState } from 'react'
 import { WinnerModal } from './WinnerModal'
+import ToggleSoundButton from './ToggleSoundButton'
+import { AudioProvider } from '../contexts/AudioContext'
 
 const defaultPokemonData = {
     name: 'Pokemon',
@@ -108,36 +110,39 @@ const Game = () => {
 
 
     return (
-        <div data-testid={'game'}>
-            <Header winner={winner} />
-            <WinnerModal winnerName={winner}/>
-            <PokemonSelector
-                availablePokemon={availablePokemon}
-                setPlayerPokemon={(pokemon: PokemonResult) => setPlayerSelection(pokemon)}
-                setOpponentPokemon={(pokemon: PokemonResult) => setOpponentSelection(pokemon)}
-                selectionCompleteCallback={() => setActivePlayer(1)}
-            />
-            {playerPokemon &&
-                <Character
-                    name={playerPokemon.name}
-                    baseHp={playerPokemon.baseHp}
-                    currentHp={playerPokemon.currentHp}
-                    moves={playerPokemon.moves}
-                    imgUrl={playerPokemon.imgUrl}
-                    attackCallback={(move) => onPlayerAttackClicked(move)}
-                    disabledButtons={!!winner || activePlayer !== 1}
+        <AudioProvider>
+            <div data-testid={'game'}>
+                <ToggleSoundButton />
+                <Header winner={winner} />
+                <WinnerModal winnerName={winner} />
+                <PokemonSelector
+                    availablePokemon={availablePokemon}
+                    setPlayerPokemon={(pokemon: PokemonResult) => setPlayerSelection(pokemon)}
+                    setOpponentPokemon={(pokemon: PokemonResult) => setOpponentSelection(pokemon)}
+                    selectionCompleteCallback={() => setActivePlayer(1)}
                 />
-            }
-            <div style={{ height: '100px' }}></div>
-            {opponentPokemon &&
-                <Character
-                    {...opponentPokemon}
-                    attackCallback={(move) => onOpenentAttackClicked(move)}
-                    disabledButtons={!!winner  || activePlayer !== 2}
-                />
-            }
-            <BattleLog messages={battleLog}/>
-        </div>
+                {playerPokemon &&
+                    <Character
+                        name={playerPokemon.name}
+                        baseHp={playerPokemon.baseHp}
+                        currentHp={playerPokemon.currentHp}
+                        moves={playerPokemon.moves}
+                        imgUrl={playerPokemon.imgUrl}
+                        attackCallback={(move) => onPlayerAttackClicked(move)}
+                        disabledButtons={!!winner || activePlayer !== 1}
+                    />
+                }
+                <div style={{ height: '100px' }}></div>
+                {opponentPokemon &&
+                    <Character
+                        {...opponentPokemon}
+                        attackCallback={(move) => onOpenentAttackClicked(move)}
+                        disabledButtons={!!winner || activePlayer !== 2}
+                    />
+                }
+                <BattleLog messages={battleLog} />
+            </div>
+        </AudioProvider>
 
     )
 }

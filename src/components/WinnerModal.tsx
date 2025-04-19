@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Modal,
     Box,
@@ -11,6 +11,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Confetti from 'react-confetti';
+import { useAudio } from '../contexts/AudioContext';
+import croudSoundUrl from '../assets/croud_cheering.mp3';
 
 type WinnerModalProps = {
     winnerName?: string;
@@ -35,6 +37,8 @@ export const WinnerModal: React.FC<WinnerModalProps> = ({
 }) => {
     const [open, setOpen] = useState(!!winnerName);
     const [showConfetti, setShowConfetti] = useState(false);
+    const { soundEnabled } = useAudio()
+    const playAudio = useCallback(() => soundEnabled && (new Audio(croudSoundUrl)).play(), [soundEnabled])
 
     useEffect(() => {
         if (winnerName) {
@@ -45,18 +49,19 @@ export const WinnerModal: React.FC<WinnerModalProps> = ({
     useEffect(() => {
         if (open) {
             setShowConfetti(true);
+            playAudio()
             const timeout = setTimeout(() => setShowConfetti(false), 20_000); // confetti for 20 sec
             return () => clearTimeout(timeout);
         }
         else {
             setShowConfetti(false)
         }
-    }, [open]);
+    }, [open, playAudio]);
     const onClose = () => setOpen(false)
 
     return (
         <>
-            {showConfetti && <Box sx={{position: 'absolute', zIndex: 99999, top:0, left: 0}}>
+            {showConfetti && <Box sx={{ position: 'absolute', zIndex: 99999, top: 0, left: 0 }}>
                 <Confetti width={window.innerWidth} height={window.innerHeight} recycle={true} numberOfPieces={500} />
             </Box>}
             <Modal
@@ -98,5 +103,5 @@ export const WinnerModal: React.FC<WinnerModalProps> = ({
 
 type CursiveTypographyProps = Omit<TypographyProps, "fontFamily">
 const CursiveTypography = (props: CursiveTypographyProps) => {
-    return <Typography fontFamily={"cursive"} {...props}/>
+    return <Typography fontFamily={"cursive"} {...props} />
 }
