@@ -61,6 +61,7 @@ export const WinnerModal: React.FC<WinnerModalProps> = ({
             </Box>}
             <Modal
                 open={open}
+                onClose={() => setOpen(false)}
                 closeAfterTransition
                 slots={{ backdrop: Backdrop }}
                 slotProps={{
